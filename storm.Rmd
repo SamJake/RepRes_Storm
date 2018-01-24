@@ -7,9 +7,22 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-```{r cars}
-summary(cars)
+## Loading libraries
+```{r libraries}
+#library(cacher)
+library(dplyr)
 ```
 
+## Reading data
+
+```{r read}
+data <- read.csv("C:/Users/SamJacobJulian/Downloads/repdata%2Fdata%2FStormData.csv.bz2")
+head(data[,1:5])
+```
+
+```{r max_fatalities}
+data_evtype <- data %>% group_by(EVTYPE) %>% summarise(sum(FATALITIES))
+length(unique(data$EVTYPE))
+which.max(data_evtype$`sum(FATALITIES)`)
+data_evtype[834,]
+```
