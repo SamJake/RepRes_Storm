@@ -1,7 +1,12 @@
 ---
-title: 'Reproducible Research: Course Project 2'
+title: 'US Storm Analysis'
 output: html_document
 ---
+
+##Synopsis
+Storm Data is an official publication of the National Oceanic and Atmospheric Administration (NOAA), which documents several types of severe weather events that result in fatalities and or property damage.
+In this, we try to summarize the data based on the number of fatalities or property damage for each event type and
+try to figure out the worst weather events in terms of fatalities or property damage wise.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -11,22 +16,25 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r libraries}
 #library(cacher)
 library(dplyr)
-library(lattice)
+library(ggplot2)
 ```
 
 ## Reading data
-
+Data Processing
+We read the data in R and it is ready to be processed. No clean up activity is performed on the data.
 ```{r read, cache=TRUE}
 data <- read.csv("C:/Users/SamJacobJulian/Downloads/repdata%2Fdata%2FStormData.csv.bz2")
 head(data[,1:5])
 ```
 
+## Description
+There are several type of severe weather events that result in fatalities and or property damage.
+In this block of code, we try to summarize the data based on the number of fatalities for each event type.
+Since there are so many events that don't have any fatalities, they have been removed and the top 10 most fatal 
+events have been listed in descending order.
 ```{r max_fatalities}
 data_evtype <- data %>% group_by(EVTYPE) %>% summarise(sum(FATALITIES))
 length(unique(data$EVTYPE))
-# Finding maximum fatalities
-which.max(data_evtype$`sum(FATALITIES)`)
-print(data_evtype[834,])
 # Separating events with fatalities
 fat_ind <- which(data_evtype$`sum(FATALITIES)`>0)
 fat <- data_evtype[fat_ind,]
@@ -35,16 +43,44 @@ fat_ord <- fat %>% arrange(desc((fat$`sum(FATALITIES)`)))
 head(fat_ord,10)
 ```
 
+## Description
+There are several type of severe weather events that result in fatalities and or property damage.
+In this block of code, we try to summarize the data based on the extent of property damage for each event type.
+Since there are so many events that don't have any property damage, they have been removed and the top 10 most damaging events have been listed in descending order.
 
 ```{r max_damage}
 data_damage <- data %>% group_by(EVTYPE) %>% summarise(sum(PROPDMG))
-# Finding maximum damages
-which.max(data_damage$`sum(PROPDMG)`)
-print(data_damage[834,])
 # Separating events with fatalities
 dam_ind <- which(data_damage$`sum(PROPDMG)`>0)
 dam <- data_damage[dam_ind,]
 # Top 10 disastrous events in US history
 dam_ord <- dam %>% arrange(desc((dam$`sum(PROPDMG)`)))
 head(dam_ord,10)
+```
+
+## Results
+The results clearly show us that tornadoes are the most severe weather type in US.
+```{r results}
+# Finding maximum fatalities
+which.max(data_evtype$`sum(FATALITIES)`)
+print(data_evtype[834,])
+# Finding maximum damages
+which.max(data_damage$`sum(PROPDMG)`)
+print(data_damage[834,])
+```
+
+## Plots
+The plots show that tornadoes have been the most severe weather type for both human fatalities and property damage.
+```{r plots}
+sub1 <- head(fat_ord,10)
+g1 <- ggplot(sub1,aes(sub1$EVTYPE,sub1$`sum(FATALITIES)`))+geom_point(col=1:10,size=3)
+g1 <- g1 + ggtitle("US storm data: Fatalities") + xlab("Event type") + ylab("Human Fatalities")
+g1 <- g1 + theme(axis.text.x = element_text(angle=90,hjust=1))
+g1
+
+sub2 <- head(dam_ord,10)
+g2 <- ggplot(sub2,aes(sub2$EVTYPE,sub2$`sum(PROPDMG)`))+geom_point(col=11:20,size=3)
+g2 <- g2 + ggtitle("US storm data: Property damage wise") + xlab("Event type") + ylab("Damages")
+g2 <- g2 + theme(axis.text.x = element_text(angle=90,hjust=1))
+g2
 ```
